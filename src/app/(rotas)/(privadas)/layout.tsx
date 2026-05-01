@@ -1,6 +1,6 @@
+import { Header } from "@/components/Header";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,7 +27,15 @@ export default function RootLayout({
       lang="pt-BR"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#2A2A2A]">{children}</body>
+      <body className="min-h-full flex flex-col bg-[#2A2A2A]">
+        <header className="px-6">
+          <Header />
+        </header>
+        <main className="flex-1 px-6 py-4">{children}</main>
+        <footer className="h-12 flex items-center justify-center border-t border-gray-700 text-sm text-white">
+          © 2026 Barbearia
+        </footer>
+      </body>
     </html>
   );
 }
