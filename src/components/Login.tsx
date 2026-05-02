@@ -52,7 +52,7 @@ export const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            <p className="text-end text-[#D4AF37] cursor-pointer text-sm">
+            <p className="text-end text-[#D4AF37] cursor-pointer text-sm hover:underline hover:text-[#D4AF37]">
               Esqueceu sua senha?
             </p>
           </Field>
@@ -64,7 +64,7 @@ export const Login = () => {
 
         <p className="text-center mt-6 text-sm md:text-base">
           Não tem conta?{" "}
-          <span className="text-[#D4AF37] cursor-pointer">
+          <span className="text-[#D4AF37] cursor-pointer hover:underline hover:text-[#D4AF37]">
             Cadastre-se
           </span>
         </p>
