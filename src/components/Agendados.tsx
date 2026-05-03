@@ -20,7 +20,7 @@ export const Agendados = () => {
   return (
     <div>
       <h1 className="text-4xl text-white my-4">
-        Bem Vindo, Fulano!
+        Bem Vindo, variavel de usuario!
         <br />
         Seus agendamentos para hoje:
       </h1>
@@ -37,7 +37,7 @@ export const Agendados = () => {
               <p>{item.time}</p>
             </div>
 
-            <div className="flex p-3 justify-center items-center w-15 h-15 rounded-full bg-[#D4AF37] hover:opacity-80">
+            <div className="flex p-3 justify-center items-center w-15 h-15 rounded-full bg-[#000000] hover:opacity-80">
               <Image src={whatsAppLogo} width={40} height={40} alt="WhatsApp" />
             </div>
           </div>

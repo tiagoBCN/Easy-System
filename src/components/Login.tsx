@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "./ui/button";
 import { Field, FieldLabel } from "./ui/field";
 import { Input } from "./ui/input";
+import fundoLogin from "../../assets/fundologin.png";
 
 export const Login = () => {
   const [email, setEmail] = useState("");
@@ -17,11 +18,14 @@ export const Login = () => {
   };
 
   return (
-    <div className="flex items-center justify-center bg-black px-4 rounded-md">
-      <div className="flex flex-col items-center text-white w-full max-w-md md:max-w-lg lg:max-w-xl bg-black p-6 md:p-10 rounded-3xl shadow-lg">
-        
+    <div
+      className="flex items-center justify-center px-4 rounded-md bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: `url(${fundoLogin.src})` }}
+    >
+      <div className="flex flex-col items-center text-white w-full ">
+
         <h1 className="text-2xl md:text-3xl lg:text-4xl mb-6 md:mb-10 text-center">
-          Barbearia Stillus Men
+          Easy Barber Shop
         </h1>
 
         <form

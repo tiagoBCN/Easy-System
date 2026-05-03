@@ -10,22 +10,27 @@ export const Header = () => {
     setOpen(!open);
   };
   return (
-    <div className="flex justify-between items-center h-20 px-4 w-full text-white bg-[#1A1A1A] rounded-md">
-      <h1 className="text-4xl">Barbearia Stillus Men</h1>
+    <div className="flex items-center h-20 px-4 w-full text-white bg-[#1A1A1A] rounded-md">
+      <h1 className="text-4xl [font-family:var(--font-rye)] mx-auto">
+        Barbearia Stillus Men
+      </h1>
       <List onClick={openModal} />
       {open && (
         <div className="text-end bg-[#1A1A1A] w-[18%] mr-6 p-4 absolute right-0 top-17 rounded-md transition">
           <p className="text-xl p-4 cursor-pointer border-b hover:underline ">
-            Agendamentos de Hoje
+            Agendamentos do dia
           </p>
           <p className="text-xl p-4 cursor-pointer border-b hover:underline">
-            Serviços
+            Cadastrar serviços
           </p>
           <p className="text-xl p-4 cursor-pointer border-b hover:underline">
-            Opçoes
+            Cadastrar clientes
           </p>
           <p className="text-xl p-4 cursor-pointer border-b hover:underline">
-            Horários
+            Ajustar orários
+          </p>
+          <p className="text-xl p-4 cursor-pointer border-b hover:underline">
+            opções
           </p>
         </div>
       )}
