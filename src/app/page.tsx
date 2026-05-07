@@ -1,13 +1,9 @@
-"use client"
+"use client";
 
 import { Login } from "@/components/Login";
 
 const Page = () => {
-    return (
-        <div className="flex justify-center items-center h-screen w-screen">
-            <Login />
-        </div>
-    )
-}
+  return <Login />;
+};
 
 export default Page;

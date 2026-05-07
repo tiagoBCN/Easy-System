@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Playfair_Display, Rye } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -12,9 +12,21 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+});
+
+const rye = Rye({
+  variable: "--font-rye",
+  subsets: ["latin"],
+  weight: "400",
+});
+
 export const metadata: Metadata = {
-  title: "App",
-  description: "Agende seu serviço de forma rápida e prática",
+  title: "Easy Barber Shop | Sistema de Agendamento",
+  description: "Agende seu corte de cabelo de forma rápida e prática com o Easy Barber Shop.",
 };
 
 export default function RootLayout({
@@ -25,9 +37,9 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${rye.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#2A2A2A]">{children}</body>
+      <body className="min-h-full flex flex-col bg-[#0f0f0f]">{children}</body>
     </html>
   );
 }
