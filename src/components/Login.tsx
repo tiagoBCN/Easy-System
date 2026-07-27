@@ -573,7 +573,7 @@ export const Login = () => {
                 letterSpacing: "0.05em",
               }}
             >
-              © {new Date().getFullYear()} Easy Barber Shop · Todos os direitos reservados
+              © 2026 Easy Barber Shop · Todos os direitos reservados
             </p>
           </div>
         </div>

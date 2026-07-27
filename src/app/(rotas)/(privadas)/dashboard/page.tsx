@@ -1,10 +1,10 @@
-import { Agendados } from "@/components/Agendados";
+import { Gerenciamento } from "@/components/Gerenciamento";
 
 const DashBoard = () => {
   return (
-  <div>
-    <Agendados />
-  </div>
+    <div>
+      <Gerenciamento />
+    </div>
   );
 };
 
