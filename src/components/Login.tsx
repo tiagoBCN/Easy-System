@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import fundoLogin from "../../assets/fundologin.png";
 
 // Ícones inline para evitar dependências extras
@@ -25,7 +26,7 @@ const ScissorsIcon = () => (
   </svg>
 );
 
-const EnvelopeIcon = () => (
+const PhoneIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="18"
@@ -37,8 +38,7 @@ const EnvelopeIcon = () => (
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <rect width="20" height="16" x="2" y="4" rx="2" />
-    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
   </svg>
 );
 
@@ -95,15 +95,42 @@ const EyeIcon = ({ open }: { open: boolean }) =>
   );
 
 export const Login = () => {
-  const [email, setEmail] = useState("");
+  const router = useRouter();
+  const [celular, setCelular] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [emailFocused, setEmailFocused] = useState(false);
+  const [celularFocused, setCelularFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`email: ${email},\nsenha: ${password}`);
+    setErrorMsg("");
+    setLoading(true);
+    try {
+      const response = await fetch("http://localhost:3001/api/auth/login/owner", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ celular, senha: password }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Erro ao realizar o login");
+      }
+      
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("role", data.role);
+      
+      router.push("/dashboard");
+    } catch (err: any) {
+      setErrorMsg(err.message || "Erro de conexão com o servidor.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -213,46 +240,31 @@ export const Login = () => {
 
           {/* Overlay escuro gradiente */}
           <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(135deg, rgba(0,0,0,0.80) 0%, rgba(15,10,0,0.70) 50%, rgba(0,0,0,0.85) 100%)",
-            }}
+            className="absolute inset-0 bg-gradient-to-br from-black/80 via-[rgba(15,10,0,0.7)] to-black/85"
           />
 
           {/* Partículas decorativas */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="particle" style={{ width: 80, height: 80, top: "15%", left: "12%", animationDuration: "5s" }} />
-            <div className="particle" style={{ width: 50, height: 50, top: "65%", left: "8%", animationDuration: "4.2s" }} />
-            <div className="particle" style={{ width: 120, height: 120, top: "75%", left: "72%", animationDuration: "6s", opacity: 0.08 }} />
-            <div className="particle" style={{ width: 35, height: 35, top: "30%", left: "80%", animationDuration: "3.5s" }} />
+            <div className="particle w-20 h-20 top-[15%] left-[12%] animate-[float_5s_ease-in-out_infinite]" />
+            <div className="particle w-[50px] h-[50px] top-[65%] left-[8%] animate-[float_4.2s_ease-in-out_infinite]" />
+            <div className="particle w-[120px] h-[120px] top-[75%] left-[72%] animate-[float_6s_ease-in-out_infinite] opacity-[0.08]" />
+            <div className="particle w-[35px] h-[35px] top-[30%] left-[80%] animate-[float_3.5s_ease-in-out_infinite]" />
           </div>
 
           {/* Conteúdo hero */}
           <div className="relative z-10 flex flex-col items-center justify-center w-full px-12 text-center">
             {/* Linha decorativa */}
             <div className="flex items-center gap-4 mb-8">
-              <div style={{ height: 1, width: 60, background: "linear-gradient(90deg, transparent, #D4AF37)" }} />
-              <span style={{ color: "#D4AF37", fontSize: "0.7rem", letterSpacing: "0.35em", textTransform: "uppercase" }}>
+              <div className="h-[1px] w-[60px] bg-gradient-to-r from-transparent to-[#D4AF37]" />
+              <span className="text-[#D4AF37] text-[0.7rem] tracking-[0.35em] uppercase">
                 Agenda Fácil
               </span>
-              <div style={{ height: 1, width: 60, background: "linear-gradient(90deg, #D4AF37, transparent)" }} />
+              <div className="h-[1px] w-[60px] bg-gradient-to-r from-[#D4AF37] to-transparent" />
             </div>
 
             {/* Ícone tesoura animado */}
             <div className="scissors-float mb-6">
-              <div
-                style={{
-                  width: 80,
-                  height: 80,
-                  borderRadius: "50%",
-                  background: "rgba(212,175,55,0.12)",
-                  border: "1.5px solid rgba(212,175,55,0.3)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backdropFilter: "blur(8px)",
-                }}
+              <div className="w-20 h-20 rounded-full bg-[#D4AF37]/12 border-[1.5px] border-[#D4AF37]/30 flex items-center justify-center backdrop-blur-md"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="6" cy="6" r="3" />
@@ -266,40 +278,21 @@ export const Login = () => {
 
             {/* Título principal */}
             <h1
+              className="font-playfair text-[clamp(2.2rem,3.5vw,3.2rem)] font-bold text-white leading-[1.15] mb-4"
               style={{
                 fontFamily: "var(--font-playfair), Georgia, serif",
-                fontSize: "clamp(2.2rem, 3.5vw, 3.2rem)",
-                fontWeight: 700,
-                color: "#ffffff",
-                lineHeight: 1.15,
-                marginBottom: "1rem",
                 textShadow: "0 2px 20px rgba(0,0,0,0.5)",
               }}
             >
               Easy{" "}
-              <span
-                style={{
-                  background: "linear-gradient(135deg, #D4AF37, #f0cc5a, #B8960C)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                }}
-              >
+              <span className="bg-gradient-to-br from-[#D4AF37] via-[#f0cc5a] to-[#B8960C] bg-clip-text text-transparent">
                 Barber
               </span>{" "}
               Shop
             </h1>
 
             {/* Tagline */}
-            <p
-              style={{
-                color: "rgba(255,255,255,0.65)",
-                fontSize: "1.05rem",
-                maxWidth: 380,
-                lineHeight: 1.7,
-                marginBottom: "2.5rem",
-              }}
-            >
+            <p className="text-white/65 text-[1.05rem] max-w-[380px] leading-[1.7] mb-10">
               Sua Agenda Virtual com facilidade e estilo. Excelência em cada detalhe.
             </p>
 
@@ -308,16 +301,7 @@ export const Login = () => {
               {["✦ Agendamento Online", "✦ Profissionais Top", "✦ Atendimento Premium"].map((badge) => (
                 <span
                   key={badge}
-                  style={{
-                    fontSize: "0.72rem",
-                    color: "rgba(212,175,55,0.85)",
-                    border: "1px solid rgba(212,175,55,0.25)",
-                    borderRadius: 999,
-                    padding: "4px 14px",
-                    letterSpacing: "0.05em",
-                    backdropFilter: "blur(4px)",
-                    background: "rgba(212,175,55,0.06)",
-                  }}
+                  className="text-[0.72rem] text-[#D4AF37]/85 border border-[#D4AF37]/25 rounded-full px-[14px] py-1 tracking-[0.05em] backdrop-blur-[4px] bg-[#D4AF37]/6"
                 >
                   {badge}
                 </span>
@@ -328,38 +312,27 @@ export const Login = () => {
 
         {/* ── LADO DIREITO: Painel de login ──────────────────── */}
         <div
-          className="flex flex-1 items-center justify-center px-6 py-12 lg:px-14 relative"
-          style={{ background: "#0f0f0f" }}
+          className="flex flex-1 items-center justify-center px-6 py-12 lg:px-14 relative bg-[#0f0f0f]"
         >
           {/* Glow de fundo sutil */}
           <div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full pointer-events-none"
             style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: 400,
-              height: 400,
-              borderRadius: "50%",
               background: "radial-gradient(circle, rgba(212,175,55,0.05) 0%, transparent 70%)",
-              pointerEvents: "none",
             }}
           />
 
           {/* Card principal */}
           <div
-            className="login-panel relative w-full"
-            style={{ maxWidth: 420 }}
+            className="login-panel relative w-full max-w-[420px]"
           >
             {/* Header mobile: logo visível só no mobile */}
             <div className="flex lg:hidden items-center justify-center gap-3 mb-8">
               <ScissorsIcon />
               <span
+                className="text-[1.4rem] font-bold text-white"
                 style={{
                   fontFamily: "var(--font-playfair), Georgia, serif",
-                  fontSize: "1.4rem",
-                  fontWeight: 700,
-                  color: "#fff",
                 }}
               >
                 Easy Barber Shop
@@ -371,26 +344,14 @@ export const Login = () => {
               {/* Ícone desktop */}
               <div className="hidden lg:flex items-center gap-3 mb-6">
                 <div
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 12,
-                    background: "rgba(212,175,55,0.1)",
-                    border: "1px solid rgba(212,175,55,0.25)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
+                  className="w-11 h-11 rounded-[12px] bg-[#D4AF37]/10 border border-[#D4AF37]/25 flex items-center justify-center"
                 >
                   <ScissorsIcon />
                 </div>
                 <span
+                  className="text-[1.15rem] font-semibold text-[#D4AF37] tracking-[0.02em]"
                   style={{
                     fontFamily: "var(--font-playfair), Georgia, serif",
-                    fontSize: "1.15rem",
-                    fontWeight: 600,
-                    color: "#D4AF37",
-                    letterSpacing: "0.02em",
                   }}
                 >
                   Easy Barber Shop
@@ -398,17 +359,11 @@ export const Login = () => {
               </div>
 
               <h2
-                style={{
-                  fontSize: "1.75rem",
-                  fontWeight: 700,
-                  color: "#ffffff",
-                  marginBottom: "0.4rem",
-                  letterSpacing: "-0.01em",
-                }}
+                className="text-[1.75rem] font-bold text-white mb-[0.4rem] tracking-[-0.01em]"
               >
                 Bem-vindo de volta
               </h2>
-              <p style={{ color: "#6b7280", fontSize: "0.92rem" }}>
+              <p className="text-[#6b7280] text-[0.92rem]">
                 Acesse sua conta para continuar
               </p>
             </div>
@@ -416,46 +371,40 @@ export const Login = () => {
             {/* Formulário */}
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
 
-              {/* Campo Email */}
+              {errorMsg && (
+                <div style={{ color: "#ef4444", fontSize: "0.87rem", backgroundColor: "rgba(239, 68, 68, 0.1)", padding: "10px", borderRadius: "8px", border: "1px solid rgba(239, 68, 68, 0.2)", textAlign: "center" }}>
+                  {errorMsg}
+                </div>
+              )}
+
+              {/* Campo Celular */}
               <div className="flex flex-col gap-2">
                 <label
-                  htmlFor="email"
-                  style={{ fontSize: "0.82rem", color: "#9ca3af", fontWeight: 500, letterSpacing: "0.03em" }}
+                  htmlFor="celular"
+                  className="text-[0.82rem] text-[#9ca3af] font-medium tracking-[0.03em]"
                 >
-                  Email
+                  Celular
                 </label>
-                <div style={{ position: "relative" }}>
+                <div className="relative">
                   <span
+                    className="absolute left-[14px] top-1/2 -translate-y-1/2 pointer-events-none transition-opacity duration-200"
                     style={{
-                      position: "absolute",
-                      left: 14,
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      pointerEvents: "none",
-                      transition: "opacity 0.2s",
-                      opacity: emailFocused ? 0.4 : 1,
+                      opacity: celularFocused ? 0.4 : 1,
                     }}
                   >
-                    <EnvelopeIcon />
+                    <PhoneIcon />
                   </span>
                   <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="seu@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    onFocus={() => setEmailFocused(true)}
-                    onBlur={() => setEmailFocused(false)}
+                    id="celular"
+                    name="celular"
+                    type="tel"
+                    placeholder="(11) 99999-9999"
+                    value={celular}
+                    onChange={(e) => setCelular(e.target.value)}
+                    onFocus={() => setCelularFocused(true)}
+                    onBlur={() => setCelularFocused(false)}
                     required
-                    className="input-field w-full rounded-xl"
-                    style={{
-                      height: 52,
-                      paddingLeft: 46,
-                      paddingRight: 16,
-                      fontSize: "0.95rem",
-                      borderRadius: 12,
-                    }}
+                    className="input-field w-full h-[52px] pl-[46px] pr-4 text-[0.95rem] rounded-[12px]"
                   />
                 </div>
               </div>
@@ -464,19 +413,14 @@ export const Login = () => {
               <div className="flex flex-col gap-2">
                 <label
                   htmlFor="password"
-                  style={{ fontSize: "0.82rem", color: "#9ca3af", fontWeight: 500, letterSpacing: "0.03em" }}
+                  className="text-[0.82rem] text-[#9ca3af] font-medium tracking-[0.03em]"
                 >
                   Senha
                 </label>
-                <div style={{ position: "relative" }}>
+                <div className="relative">
                   <span
+                    className="absolute left-[14px] top-1/2 -translate-y-1/2 pointer-events-none transition-opacity duration-200"
                     style={{
-                      position: "absolute",
-                      left: 14,
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      pointerEvents: "none",
-                      transition: "opacity 0.2s",
                       opacity: passwordFocused ? 0.4 : 1,
                     }}
                   >
@@ -492,30 +436,12 @@ export const Login = () => {
                     onFocus={() => setPasswordFocused(true)}
                     onBlur={() => setPasswordFocused(false)}
                     required
-                    className="input-field w-full"
-                    style={{
-                      height: 52,
-                      paddingLeft: 46,
-                      paddingRight: 48,
-                      fontSize: "0.95rem",
-                      borderRadius: 12,
-                    }}
+                    className="input-field w-full h-[52px] pl-[46px] pr-[48px] text-[0.95rem] rounded-[12px]"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    style={{
-                      position: "absolute",
-                      right: 14,
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      padding: 4,
-                      display: "flex",
-                      alignItems: "center",
-                    }}
+                    className="absolute right-[14px] top-1/2 -translate-y-1/2 bg-none border-none cursor-pointer p-1 flex items-center"
                     aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                   >
                     <EyeIcon open={showPassword} />
@@ -524,7 +450,7 @@ export const Login = () => {
 
                 {/* Esqueceu a senha */}
                 <div className="flex justify-end mt-1">
-                  <span className="gold-link" style={{ fontSize: "0.82rem" }}>
+                  <span className="gold-link text-[0.82rem]">
                     Esqueceu sua senha?
                   </span>
                 </div>
@@ -533,31 +459,25 @@ export const Login = () => {
               {/* Botão Entrar */}
               <button
                 type="submit"
-                className="btn-gold w-full"
+                disabled={loading}
+                className="btn-gold w-full h-[52px] rounded-[12px] border-none text-[#0f0f0f] font-bold text-[0.98rem] tracking-[0.04em] mt-1"
                 style={{
-                  height: 52,
-                  borderRadius: 12,
-                  border: "none",
-                  color: "#0f0f0f",
-                  fontWeight: 700,
-                  fontSize: "0.98rem",
-                  letterSpacing: "0.04em",
-                  cursor: "pointer",
-                  marginTop: 4,
+                  cursor: loading ? "not-allowed" : "pointer",
+                  opacity: loading ? 0.7 : 1,
                 }}
               >
-                ENTRAR
+                {loading ? "ENTRANDO..." : "ENTRAR"}
               </button>
 
               {/* Divisória OU */}
-              <div className="divider-or" style={{ color: "#3a3a3a", fontSize: "0.72rem", letterSpacing: "0.12em" }}>
+              <div className="divider-or text-[#3a3a3a] text-[0.72rem] tracking-[0.12em]">
                 OU
               </div>
 
               {/* Rodapé */}
-              <p style={{ textAlign: "center", color: "#6b7280", fontSize: "0.87rem" }}>
+              <p className="text-center text-[#6b7280] text-[0.87rem]">
                 Não tem uma conta?{" "}
-                <span className="gold-link" style={{ fontWeight: 600 }}>
+                <span className="gold-link font-semibold">
                   Cadastre-se
                 </span>
               </p>
@@ -565,13 +485,7 @@ export const Login = () => {
 
             {/* Linha de crédito */}
             <p
-              style={{
-                textAlign: "center",
-                color: "#2a2a2a",
-                fontSize: "0.72rem",
-                marginTop: "2.5rem",
-                letterSpacing: "0.05em",
-              }}
+              className="text-center text-[#2a2a2a] text-[0.72rem] mt-10 tracking-[0.05em]"
             >
               © 2026 Easy Barber Shop · Todos os direitos reservados
             </p>
