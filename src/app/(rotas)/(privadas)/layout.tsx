@@ -2,7 +2,7 @@ import { Header } from "@/components/Header";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Dashboard | Barbearia Stillus Men",
+  title: "Dashboard | System Barber",
   description: "Gerencie seus agendamentos e clientes com facilidade.",
 };
 
@@ -38,7 +38,7 @@ export default function PrivateLayout({
         }}
       >
         <p style={{ fontSize: "0.78rem", color: "#4b5563", letterSpacing: "0.03em" }}>
-          © 2026 Barbearia Stillus Men · Todos os direitos reservados
+          © 2026 System Barber · Todos os direitos reservados
         </p>
       </footer>
     </>

@@ -44,7 +44,7 @@ export const Header = () => {
       <div className="flex items-center justify-center gap-3 flex-1 min-w-0">
         <Scissors size={22} className="text-[#D4AF37] shrink-0" />
         <h1 className="bg-gradient-to-r from-[#D4AF37] via-[#f0cc5a] to-[#B8960C] bg-clip-text text-transparent truncate font-serif text-base sm:text-xl md:text-2xl font-normal leading-tight tracking-wide">
-          Barbearia Stillus Men
+          System Barber
         </h1>
       </div>
 
