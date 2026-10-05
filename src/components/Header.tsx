@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Menu,
   X,
@@ -10,19 +11,14 @@ import {
   UserPlus,
   Clock,
   Settings,
+  LogOut,
+  User,
 } from "lucide-react";
-
-const menuItems = [
-  { label: "Agendamentos do dia", icon: Calendar },
-  { label: "Cadastrar serviços", icon: PlusCircle },
-  { label: "Cadastrar clientes", icon: UserPlus },
-  { label: "Ajustar horários", icon: Clock },
-  { label: "Opções", icon: Settings },
-];
 
 export const Header = () => {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const { user, role, logout } = useAuth();
 
   // Fecha o menu ao clicar fora
   useEffect(() => {
@@ -34,6 +30,14 @@ export const Header = () => {
     if (open) document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
+
+  const menuItems = [
+    { label: "Agendamentos do dia", icon: Calendar },
+    { label: "Cadastrar serviços", icon: PlusCircle },
+    { label: "Cadastrar clientes", icon: UserPlus },
+    { label: "Ajustar horários", icon: Clock },
+    { label: "Opções", icon: Settings },
+  ];
 
   return (
     <div className="bg-[#1a1a1a] border-b border-[#D4AF37]/20 h-[72px] flex items-center relative z-50 px-4 sm:px-6 lg:px-10">
@@ -61,16 +65,23 @@ export const Header = () => {
 
         {/* Dropdown */}
         {open && (
-          <div className="absolute top-[calc(100%+10px)] right-0 w-[min(260px,90vw)] bg-[#1a1a1a]/95 backdrop-blur-md border border-[#D4AF37]/20 rounded-2xl overflow-hidden shadow-2xl z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
-            {/* Cabeçalho do dropdown */}
-            <div className="px-4 py-3 border-b border-[#D4AF37]/10 flex items-center gap-2">
-              <Scissors size={14} className="text-[#D4AF37]" />
-              <span className="text-[11px] text-[#D4AF37] tracking-widest uppercase font-semibold">
-                Menu Principal
-              </span>
+          <div className="absolute top-[calc(100%+10px)] right-0 w-[min(280px,90vw)] bg-[#1a1a1a]/95 backdrop-blur-md border border-[#D4AF37]/20 rounded-2xl overflow-hidden shadow-2xl z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
+            {/* Info do usuário logado */}
+            <div className="px-4 py-3 border-b border-[#D4AF37]/10 flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#B8960C] flex items-center justify-center shrink-0">
+                <User size={16} className="text-[#0f0f0f]" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-white text-sm font-semibold truncate">
+                  {user?.name || "Usuário"}
+                </p>
+                <p className="text-[10px] text-[#D4AF37] tracking-wider uppercase font-medium">
+                  {role === "owner" ? "Administrador" : "Cliente"}
+                </p>
+              </div>
             </div>
 
-            {/* Itens */}
+            {/* Itens do menu */}
             <nav className="py-1.5">
               {menuItems.map(({ label, icon: Icon }) => (
                 <div
@@ -86,6 +97,20 @@ export const Header = () => {
                 </div>
               ))}
             </nav>
+
+            {/* Botão de sair */}
+            <div className="border-t border-[#D4AF37]/10 p-2">
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  logout();
+                }}
+                className="flex items-center gap-3 w-full px-4 py-2.5 text-red-400 text-sm font-semibold hover:bg-red-500/10 rounded-xl transition-all duration-200 cursor-pointer"
+              >
+                <LogOut size={17} className="shrink-0" />
+                Sair da conta
+              </button>
+            </div>
           </div>
         )}
       </div>

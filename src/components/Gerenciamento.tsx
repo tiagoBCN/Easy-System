@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { clients as mockClients } from "@/utils/clients";
+import Link from "next/link";
+import { useAuth } from "@/contexts/AuthContext";
 import whatsAppLogo from "../../assets/WhatsApp_Logo_PNG_Transparente_Sem_Fundo.png";
 import {
   Calendar,
@@ -41,13 +42,13 @@ interface Appointment {
 const getInitial = (name: string) => (name ? name.charAt(0).toUpperCase() : "?");
 
 export const Gerenciamento = () => {
+  const { token } = useAuth();
   const [activeTab, setActiveTab] = useState<"agendamentos" | "servicos" | "metricas" | "horarios">("agendamentos");
   const [today, setToday] = useState("");
   const [visibleCount, setVisibleCount] = useState(4);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isOffline, setIsOffline] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   // Form para novos serviços
@@ -61,32 +62,19 @@ export const Gerenciamento = () => {
   const loadAppointments = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:3001/api/appointments");
+      const res = await fetch("http://localhost:3001/api/appointments", {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
       if (res.ok) {
         const data = await res.json();
         setAppointments(data);
-        setIsOffline(false);
       } else {
         throw new Error("Erro de servidor");
       }
     } catch (error) {
-      console.warn("Backend offline, dados simulados ativos.", error);
-      setIsOffline(true);
-      
-      const adaptedMock: Appointment[] = mockClients.map((c, i) => ({
-        id: `mock-${i}`,
-        clientName: c.name,
-        clientPhone: "5511999999999",
-        date: new Date(new Date().setHours(8 + i, 0, 0, 0)).toISOString(),
-        status: i === 0 ? "CONFIRMED" : i === 1 ? "PENDING" : "CONFIRMED",
-        service: {
-          id: `service-mock-${i}`,
-          name: c.service,
-          price: 35 + i * 5,
-          durationMin: c.time,
-        },
-      }));
-      setAppointments(adaptedMock);
+      console.error("Erro ao carregar agendamentos:", error);
     } finally {
       setLoading(false);
     }
@@ -95,21 +83,19 @@ export const Gerenciamento = () => {
   // Carregar catálogo de serviços
   const loadServices = async () => {
     try {
-      const res = await fetch("http://localhost:3001/api/services");
+      const res = await fetch("http://localhost:3001/api/services", {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
       if (res.ok) {
         const data = await res.json();
         setServices(data);
       } else {
         throw new Error("Falha ao carregar serviços");
       }
-    } catch {
-      // Mock de serviços se offline
-      setServices([
-        { id: "1", name: "Corte Social", price: 35, durationMin: 30, description: "Corte clássico tesoura/máquina" },
-        { id: "2", name: "Barba Completa", price: 30, durationMin: 25, description: "Modelagem com toalha quente" },
-        { id: "3", name: "Corte + Barba", price: 60, durationMin: 50, description: "Combo completo de cuidados" },
-        { id: "4", name: "Degradê / Fade", price: 40, durationMin: 40, description: "Corte moderno degradê na navalha" },
-      ]);
+    } catch (error) {
+      console.error("Erro ao carregar serviços:", error);
     }
   };
 
@@ -144,7 +130,10 @@ export const Gerenciamento = () => {
 
       const res = await fetch("http://localhost:3001/api/services", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify(payload),
       });
 
@@ -157,22 +146,10 @@ export const Gerenciamento = () => {
         setNewServiceDesc("");
         alert("Serviço adicionado com sucesso!");
       } else {
-        // Fallback local se offline
-        const mockCreated: Service = {
-          id: `mock-srv-${Date.now()}`,
-          name: newServiceName,
-          price: parseFloat(newServicePrice),
-          durationMin: parseInt(newServiceDuration),
-          description: newServiceDesc,
-        };
-        setServices((prev) => [...prev, mockCreated]);
-        setNewServiceName("");
-        setNewServicePrice("");
-        setNewServiceDuration("");
-        setNewServiceDesc("");
+        alert("Erro ao adicionar serviço no servidor.");
       }
     } catch {
-      alert("Serviço adicionado localmente (Backend Offline).");
+      alert("Erro de conexão ao adicionar serviço.");
     } finally {
       setSubmittingService(false);
     }
@@ -180,18 +157,14 @@ export const Gerenciamento = () => {
 
   // Alterar status de agendamento
   const handleStatusChange = async (id: string, newStatus: Appointment["status"]) => {
-    if (id.startsWith("mock-")) {
-      setAppointments((prev) =>
-        prev.map((app) => (app.id === id ? { ...app, status: newStatus } : app))
-      );
-      return;
-    }
-
     setUpdatingId(id);
     try {
       const res = await fetch(`http://localhost:3001/api/appointments/${id}/status`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({ status: newStatus }),
       });
 
@@ -245,11 +218,13 @@ export const Gerenciamento = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          {isOffline && (
-            <span className="text-xs bg-amber-500/10 text-amber-500 border border-amber-500/25 px-3 py-1.5 rounded-full font-medium">
-              Modo Simulação
-            </span>
-          )}
+          <Link 
+            href="/agendar"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#D4AF37] hover:bg-[#b5952f] text-black transition text-xs font-semibold"
+          >
+            <Plus size={14} />
+            Novo Agendamento
+          </Link>
           <button
             onClick={loadAppointments}
             disabled={loading}

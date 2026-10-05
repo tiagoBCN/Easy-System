@@ -1,10 +1,7 @@
-import { Header } from "@/components/Header";
-import type { Metadata } from "next";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Dashboard | System Barber",
-  description: "Gerencie seus agendamentos e clientes com facilidade.",
-};
+import { Header } from "@/components/Header";
+import { AuthGuard } from "@/components/AuthGuard";
 
 export default function PrivateLayout({
   children,
@@ -12,7 +9,7 @@ export default function PrivateLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <>
+    <AuthGuard>
       {/* Header fixo no topo */}
       <div className="sticky top-0 z-50">
         <Header />
@@ -21,7 +18,10 @@ export default function PrivateLayout({
       {/* Conteúdo principal */}
       <main
         className="px-4 sm:px-6 lg:px-10 py-8"
-        style={{ background: "#0f0f0f", minHeight: "calc(100vh - 72px - 52px)" }}
+        style={{
+          background: "#0f0f0f",
+          minHeight: "calc(100vh - 72px - 52px)",
+        }}
       >
         {children}
       </main>
@@ -37,10 +37,16 @@ export default function PrivateLayout({
           background: "#0f0f0f",
         }}
       >
-        <p style={{ fontSize: "0.78rem", color: "#4b5563", letterSpacing: "0.03em" }}>
+        <p
+          style={{
+            fontSize: "0.78rem",
+            color: "#4b5563",
+            letterSpacing: "0.03em",
+          }}
+        >
           © 2026 System Barber · Todos os direitos reservados
         </p>
       </footer>
-    </>
+    </AuthGuard>
   );
 }

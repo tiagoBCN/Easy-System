@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 import fundoLogin from "../../assets/fundologin.png";
 
 // Ícones inline para evitar dependências extras
@@ -96,6 +97,7 @@ const EyeIcon = ({ open }: { open: boolean }) =>
 
 export const Login = () => {
   const router = useRouter();
+  const { login, isAuthenticated, isLoading } = useAuth();
   const [celular, setCelular] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -103,6 +105,19 @@ export const Login = () => {
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Se já está autenticado, o AuthContext cuida do redirect
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center">
+        <div className="animate-pulse text-gray-500 text-sm">Carregando...</div>
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    return null;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,10 +136,7 @@ export const Login = () => {
         throw new Error(data.error || "Erro ao realizar o login");
       }
       
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-      localStorage.setItem("role", data.role);
-      
+      login(data.token, data.user, data.role);
       router.push("/dashboard");
     } catch (err: any) {
       setErrorMsg(err.message || "Erro de conexão com o servidor.");

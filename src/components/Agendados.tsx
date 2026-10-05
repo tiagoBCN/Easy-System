@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { clients as mockClients } from "@/utils/clients";
+import { useAuth } from "@/contexts/AuthContext";
 import whatsAppLogo from "../../assets/WhatsApp_Logo_PNG_Transparente_Sem_Fundo.png";
 import {
   ChevronDown,
@@ -34,44 +34,30 @@ interface Appointment {
 const getInitial = (name: string) => name ? name.charAt(0).toUpperCase() : "?";
 
 export const Agendados = () => {
+  const { token } = useAuth();
   const [today, setToday] = useState("");
   const [visibleCount, setVisibleCount] = useState(3);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isOffline, setIsOffline] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   // Carregar dados
   const loadData = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:3001/api/appointments");
+      const res = await fetch("http://localhost:3001/api/appointments", {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
       if (res.ok) {
         const data = await res.json();
         setAppointments(data);
-        setIsOffline(false);
       } else {
         throw new Error("Erro ao carregar dados do servidor");
       }
     } catch (error) {
-      console.warn("Backend offline, carregando simulação...", error);
-      setIsOffline(true);
-      
-      // Adaptar mock para o formato de banco de dados
-      const adaptedMock: Appointment[] = mockClients.map((c, i) => ({
-        id: `mock-${i}`,
-        clientName: c.name,
-        clientPhone: "5511999999999",
-        date: new Date(new Date().setHours(8 + i, 0, 0, 0)).toISOString(),
-        status: i === 0 ? "CONFIRMED" : i === 1 ? "PENDING" : "CONFIRMED",
-        service: {
-          id: `service-mock-${i}`,
-          name: c.service,
-          price: 30 + (i * 10),
-          durationMin: c.time
-        }
-      }));
-      setAppointments(adaptedMock);
+      console.error("Erro ao carregar agendamentos:", error);
     } finally {
       setLoading(false);
     }
@@ -108,19 +94,14 @@ export const Agendados = () => {
 
   // Atualizar Status do Agendamento
   const handleStatusChange = async (id: string, newStatus: Appointment["status"]) => {
-    if (id.startsWith("mock-")) {
-      // Simulação offline
-      setAppointments((prev) =>
-        prev.map((app) => (app.id === id ? { ...app, status: newStatus } : app))
-      );
-      return;
-    }
-
     setUpdatingId(id);
     try {
       const res = await fetch(`http://localhost:3001/api/appointments/${id}/status`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({ status: newStatus }),
       });
 
@@ -163,11 +144,6 @@ export const Agendados = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          {isOffline && (
-            <span className="text-xs bg-amber-500/10 text-amber-500 border border-amber-500/25 px-3 py-1.5 rounded-full font-medium">
-              Modo Simulação
-            </span>
-          )}
           <button
             onClick={loadData}
             disabled={loading}
