@@ -10,7 +10,7 @@ import {
 } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
-const API_URL = "http://localhost:3001/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface User {
   id?: string;
@@ -30,10 +30,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Rotas que não precisam de autenticação
 const PUBLIC_ROUTES = ["/", "/login"];
-
-// Rotas que só o owner pode acessar
 const OWNER_ROUTES = ["/dashboard", "/agendar"];
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -41,28 +38,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
   const router = useRouter();
   const pathname = usePathname();
 
   const isAuthenticated = !!token && !!user;
 
-  // Limpa os dados de auth
   const logout = useCallback(() => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     localStorage.removeItem("role");
+
     setToken(null);
     setUser(null);
     setRole(null);
+
     router.push("/");
   }, [router]);
 
-  // Salva os dados de auth
   const login = useCallback(
     (newToken: string, newUser: User, newRole: string) => {
       localStorage.setItem("token", newToken);
       localStorage.setItem("user", JSON.stringify(newUser));
       localStorage.setItem("role", newRole);
+
       setToken(newToken);
       setUser(newUser);
       setRole(newRole);
@@ -70,7 +69,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     []
   );
 
-  // Valida o token salvo no localStorage ao carregar a página
   useEffect(() => {
     const validateAuth = async () => {
       const savedToken = localStorage.getItem("token");
@@ -83,26 +81,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       try {
-        const res = await fetch(`${API_URL}/auth/me`, {
-          headers: { Authorization: `Bearer ${savedToken}` },
+        const res = await fetch(`${API_URL}/api/auth/me`, {
+          headers: {
+            Authorization: `Bearer ${savedToken}`,
+          },
         });
 
         if (res.ok) {
           const data = await res.json();
+
           setToken(savedToken);
           setUser(data.user);
           setRole(data.role);
         } else {
-          // Token inválido ou expirado — limpa tudo
           localStorage.removeItem("token");
           localStorage.removeItem("user");
           localStorage.removeItem("role");
+
           setToken(null);
           setUser(null);
           setRole(null);
         }
       } catch {
-        // Se o backend está offline, confia nos dados salvos temporariamente
         if (savedUser && savedRole) {
           try {
             setToken(savedToken);
@@ -122,35 +122,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     validateAuth();
   }, []);
 
-  // Proteção de rotas — redireciona quando necessário
   useEffect(() => {
     if (isLoading) return;
 
     const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
-    const isOwnerRoute = OWNER_ROUTES.some((r) => pathname.startsWith(r));
+    const isOwnerRoute = OWNER_ROUTES.some((r) =>
+      pathname.startsWith(r)
+    );
 
-    // Se não autenticado e tentando acessar rota privada → redireciona para login
     if (!isAuthenticated && !isPublicRoute) {
       router.push("/");
       return;
     }
 
-    // Se autenticado e tentando acessar login → redireciona para dashboard
     if (isAuthenticated && isPublicRoute) {
       router.push("/dashboard");
       return;
     }
 
-    // Se é client tentando acessar rota de owner → redireciona
-    if (isAuthenticated && isOwnerRoute && role !== "owner") {
+    if (
+      isAuthenticated &&
+      isOwnerRoute &&
+      role !== "owner"
+    ) {
       router.push("/");
       return;
     }
-  }, [isLoading, isAuthenticated, pathname, role, router]);
+  }, [
+    isLoading,
+    isAuthenticated,
+    pathname,
+    role,
+    router,
+  ]);
 
   return (
     <AuthContext.Provider
-      value={{ user, role, token, isLoading, isAuthenticated, login, logout }}
+      value={{
+        user,
+        role,
+        token,
+        isLoading,
+        isAuthenticated,
+        login,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>
@@ -159,8 +175,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
+
   if (context === undefined) {
-    throw new Error("useAuth deve ser usado dentro de um AuthProvider");
+    throw new Error(
+      "useAuth deve ser usado dentro de um AuthProvider"
+    );
   }
+
   return context;
 }

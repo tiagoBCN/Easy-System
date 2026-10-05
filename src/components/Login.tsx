@@ -120,30 +120,36 @@ export const Login = () => {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMsg("");
-    setLoading(true);
-    try {
-      const response = await fetch("http://localhost:3001/api/auth/login/owner", {
+  e.preventDefault();
+  setErrorMsg("");
+  setLoading(true);
+
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login/owner`,
+      {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ celular, senha: password }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || "Erro ao realizar o login");
       }
-      
-      login(data.token, data.user, data.role);
-      router.push("/dashboard");
-    } catch (err: any) {
-      setErrorMsg(err.message || "Erro de conexão com o servidor.");
-    } finally {
-      setLoading(false);
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Erro ao realizar o login");
     }
-  };
+
+    login(data.token, data.user, data.role);
+    router.push("/dashboard");
+  } catch (err: any) {
+    setErrorMsg(err.message || "Erro de conexão com o servidor.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <>
